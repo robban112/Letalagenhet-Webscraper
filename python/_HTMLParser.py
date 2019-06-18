@@ -4,11 +4,13 @@ from bs4 import BeautifulSoup
 from enum import Enum
 from WebScraper import scrapePages
 from SollentunaParser import getAvailableAppartmentsFromSollentuna
+from SigtunaHemParser import getAvailableAppartmentsFromSigtunaHem
 from Appartment import *
 
 class Provider:
-    def __init__(self, provider_string, request_url, appartment_url, location_index, address_index, rooms_index, size_index, 
-    floor_index, rent_index, available_until_index, number_of_signed_up, has_duplicates, pathToNextButton="//a[@class='btn next']"):
+    def __init__(self, provider_string, request_url, appartment_url, location_index=None, 
+    address_index=None, rooms_index=None, size_index=None, floor_index=None, rent_index=None, 
+    available_until_index=None, number_of_signed_up=None, has_duplicates=None, pathToNextButton="//a[@class='btn next']"):
         self.request_url = request_url
         self.appartment_url = appartment_url
         self.location_index = location_index
@@ -31,6 +33,7 @@ SOLLENTUNA_HEM_URL = 'https://www.sollentunahem.se/ledigt-just-nu/lagenheter/Get
 VASBY_HEM_URL = 'https://www.vasbyhem.se/ledigt/sok/lagenhet'
 HANINGE_BOSTADER_URL = 'https://minasidor.haningebostader.se/ledigt/sok/lagenhet'
 IKANO_BOSTAD_URL = 'https://hyresratt.ikanobostad.se/ledigt/sok/lagenhet'
+SIGTUNA_HEM_URL = 'https://sigtunahem.se/sok-ledigt/'
 
 FORVALTAREN = Provider("Förvaltaren",FORVALTAREN_URL, 'https://www.forvaltaren.se/ledigt/', 0, 0, 1, 2, 3, 4, 5, 6, False)
 HASSELBY_HEM = Provider("Hässelby Hem",HASSELBY_HEM_URL, 'https://bostad.hasselbyhem.se/HSS/Object/', 1, 0, 1, 2, None, 3, 4, 5, False)
@@ -38,6 +41,7 @@ SOLLENTUNA_HEM = Provider("Sollentuna Hem",SOLLENTUNA_HEM_URL, 'https://www.soll
 VASBY_HEM = Provider("Väsby Hem",VASBY_HEM_URL, 'https://www.vasbyhem.se/ledigt/detalj/', 1, 1, 2, 3, 4, 5, 6, 7, True)
 HANINGE_BOSTADER = Provider("Haninge Bostäder",HANINGE_BOSTADER_URL, 'https://minasidor.haningebostader.se/ledigt/detalj/', 1, 0, 1, 2, None, 3, 4, 5, False)
 IKANO_BOSTAD = Provider("Ikano Bostad",IKANO_BOSTAD_URL, 'https://hyresratt.ikanobostad.se/ledigt/detalj/', 1, 1, 2, 3, 0, 4, 5, None, False)
+SIGTUNA_HEM = Provider("Sigtuna Hem", SIGTUNA_HEM_URL, 'https://sigtunahem.se/sok-ledigt/ledig-lagenhet/')
 
 def getPageContent(provider):
     htmls = scrapePages(provider.request_url, provider.pathToNextButton)
@@ -51,6 +55,8 @@ def getPageContent(provider):
 def getAvailableAppartmentsFrom(provider, page_content):
     if provider == SOLLENTUNA_HEM:
         return getAvailableAppartmentsFromSollentuna(page_content, provider)
+    elif provider == SIGTUNA_HEM:
+        return getAvailableAppartmentsFromSigtunaHem(page_content, provider)
     else:
         return getStandardizedAppartmentsList(page_content, provider)
         
@@ -86,7 +92,7 @@ def getLink(aelem, provider):
     return provider.appartment_url + aelem[provider.address_index]['href']
     
 
-app = getPageContent(HASSELBY_HEM)
+app = getPageContent(SIGTUNA_HEM)
 print(app)
 
 
