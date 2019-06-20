@@ -102,7 +102,7 @@ def getLink(aelem, provider):
     return provider.appartment_url + aelem[provider.address_index]['href']
     
 
-app = list(filter(lambda x: x != None, getPageContent(BOTKYRKA_BYGGEN)))
+app = list(filter(lambda x: x != None, getPageContent(SIGTUNA_HEM)))
 print(app)
 for appart in app:
     print(appart.getJSON())
