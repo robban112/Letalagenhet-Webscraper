@@ -8,6 +8,11 @@ from SigtunaHemParser import getAvailableAppartmentsFromSigtunaHem
 from TelgeParser import getAvailableAppartmentsFromTelge
 from Appartment import *
 
+# Firebase stuff:
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+
 class Provider:
     def __init__(self, provider_string, request_url, appartment_url, location_index=None, 
     address_index=None, rooms_index=None, size_index=None, floor_index=None, rent_index=None, 
@@ -105,10 +110,18 @@ def getAppartment(appart_html, provider, index):
 
 def getLink(aelem, provider):
     return provider.appartment_url + aelem[provider.address_index]['href']
-    
+
+def dumpToDb(appartments):
+    db = firestore.client()
+    doc_ref = db.collection(u'appartments')
+    for app in appartments:
+        doc_ref.add(app.getJSON())    
 
 app = list(filter(lambda x: x != None, getPageContent(TELGE)))
-print(app)
+cred = credentials.Certificate('../hyresbevakaren-firebase-adminsdk-oqc7z-e4bcd83e25.json')
+firebase_admin.initialize_app(cred)
+
+dumpToDb(app)
 for appart in app:
     print(appart.getJSON())
 
