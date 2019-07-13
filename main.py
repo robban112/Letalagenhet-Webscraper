@@ -6,3 +6,5 @@
 # import _HTMLParser
 
 import _HTMLParser
+
+_HTMLParser.mainProgram()
