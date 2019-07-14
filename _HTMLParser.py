@@ -118,10 +118,17 @@ def dumpToDb(appartments):
         doc_ref.add(app.getJSON())    
 
 def mainProgram():
-    app = list(filter(lambda x: x != None, getPageContent(TELGE)))
+    listOfAppProviders = [TELGE,BOTKYRKA_BYGGEN,TYRESO_BOSTADER,SIGTUNA_HEM,IKANO_BOSTAD,HANINGE_BOSTADER,VASBY_HEM,SOLLENTUNA_HEM,HASSELBY_HEM,FORVALTAREN]
     cred = credentials.Certificate('hyresbevakaren-firebase-adminsdk-oqc7z-e4bcd83e25.json')
     firebase_admin.initialize_app(cred)
+    #
+    app = list(filter(lambda x: x != None, getPageContent(TELGE))) # Run single 
     dumpToDb(app)
-    for appart in app:
-        print(appart.getJSON())
+    #
 
+
+    #for appProvider in listOfAppProviders:
+    #    app = list(filter(lambda x: x != None, getPageContent(appProvider)))
+    #    dumpToDb(app)
+    #    for appart in app:
+    #        print(appart.getJSON())
