@@ -1,5 +1,7 @@
 from lxml import html
 import requests
+import asyncio
+
 from bs4 import BeautifulSoup
 from enum import Enum
 from WebScraper import scrapePages
@@ -117,18 +119,29 @@ def dumpToDb(appartments):
     for app in appartments:
         doc_ref.add(app.getJSON())    
 
+async def main(provider):
+    print('Started to fetch: ' + provider.provider_string)
+    appContent = getPageContent(provider)
+    app = list(filter(lambda x: x != None, appContent))
+    #dumpToDb(app)
+    for appart in app:
+        print(appart.getJSON())
+    print('Done fetching: ' + provider.provider_string)
+    
 def mainProgram():
-    listOfAppProviders = [TELGE,BOTKYRKA_BYGGEN,TYRESO_BOSTADER,SIGTUNA_HEM,IKANO_BOSTAD,HANINGE_BOSTADER,VASBY_HEM,SOLLENTUNA_HEM,HASSELBY_HEM,FORVALTAREN]
+    listOfAppProviders = [TELGE,BOTKYRKA_BYGGEN,TYRESO_BOSTADER,SIGTUNA_HEM,IKANO_BOSTAD,HANINGE_BOSTADER,VASBY_HEM,SOLLENTUNA_HEM,HASSELBY_HEM]#FORVALTAREN
     cred = credentials.Certificate('hyresbevakaren-firebase-adminsdk-oqc7z-e4bcd83e25.json')
     firebase_admin.initialize_app(cred)
-    #
-    app = list(filter(lambda x: x != None, getPageContent(TELGE))) # Run single 
-    dumpToDb(app)
-    #
+    
+    loop = asyncio.get_event_loop()
+    tasks = []
 
+    for appProvider in listOfAppProviders:
+        tasks.append(asyncio.ensure_future(main(appProvider)))
+    
+    loop.run_until_complete(asyncio.wait(tasks))
 
     #for appProvider in listOfAppProviders:
-    #    app = list(filter(lambda x: x != None, getPageContent(appProvider)))
-    #    dumpToDb(app)
-    #    for appart in app:
-    #        print(appart.getJSON())
+    #    task = asyncio.ensure_future(main(appProvider))
+    #    #task = loop.create_task(main(appProvider))
+    #    loop.run_until_complete(asyncio.gather(task))
