@@ -123,13 +123,13 @@ async def main(provider):
     print('Started to fetch: ' + provider.provider_string)
     appContent = getPageContent(provider)
     app = list(filter(lambda x: x != None, appContent))
-    #dumpToDb(app)
+    dumpToDb(app)
     for appart in app:
         print(appart.getJSON())
     print('Done fetching: ' + provider.provider_string)
     
 def mainProgram():
-    listOfAppProviders = [TELGE,BOTKYRKA_BYGGEN,TYRESO_BOSTADER,SIGTUNA_HEM,IKANO_BOSTAD,HANINGE_BOSTADER,VASBY_HEM,SOLLENTUNA_HEM,HASSELBY_HEM]#FORVALTAREN
+    listOfAppProviders = [TELGE,BOTKYRKA_BYGGEN,TYRESO_BOSTADER,SIGTUNA_HEM,IKANO_BOSTAD,HANINGE_BOSTADER,VASBY_HEM,SOLLENTUNA_HEM,HASSELBY_HEM,FORVALTAREN]
     cred = credentials.Certificate('hyresbevakaren-firebase-adminsdk-oqc7z-e4bcd83e25.json')
     firebase_admin.initialize_app(cred)
     
