@@ -1,7 +1,7 @@
 
 .DS_STORE
 
-hyresbevakaren-firebase-adminsdk-oqc7z-e4bcd83e25.json
+hyresbevakaren-firebase-adminsdk*.json
 
 driver/*
 # Byte-compiled / optimized / DLL files
