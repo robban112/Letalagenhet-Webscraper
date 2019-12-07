@@ -18,6 +18,6 @@ class Appartment:
         return {
             "location" : self.location, "address" : self.address, "rooms" : self.rooms, 
             "floor" : self.floor, "size" : self.size, "rent" : self.rent, "provider": self.provider, 
-            "appartment_url": self.appartment_url, "available_until" : self.available_until, 
+            "appartment_url": self.appartment_url, "image_url" : self.image_url, "available_until" : self.available_until, 
             "number_of_people_signed_up" : self.number_of_people_signed_up, "move_in_date": self.move_in_date
         }

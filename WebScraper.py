@@ -39,5 +39,11 @@ def scrapePages(url, pathToNextButton):
             return htmls
             break
 
+def getHTML(url):
+    driver = webdriver.Chrome(executable_path=os.path.abspath("driver/chromedriver"), options=chrome_options)
+    driver.implicitly_wait(10)
+    driver.get(url)
+    return driver.page_source
+
 
 #scrapePages('https://hyresratt.ikanobostad.se/ledigt/sok/lagenhet', "//a[@class='btn next']")
