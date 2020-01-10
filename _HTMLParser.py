@@ -11,10 +11,13 @@ from SigtunaHemParser import getAvailableAppartmentsFromSigtunaHem
 from TelgeParser import getAvailableAppartmentsFromTelge
 from Appartment import *
 from Provider import Provider, ProviderIndexes
+from FirebaseCommunicator import * 
 
-,import firebase_admin
+import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
+
+
 
 FORVALTAREN_URL = 'https://www.forvaltaren.se/ledigt/lagenhet'
 HASSELBY_HEM_URL = 'https://bostad.hasselbyhem.se/HSS/Object/object_list.aspx?cmguid=4e6e781e-5257-403e-b09d-7efc8edb0ac8&objectgroup=1'
@@ -37,12 +40,14 @@ TELGE_URL = 'https://hyresborsen.telge.se/res/themes/telgebostader/pages/public/
 FORVALTAREN_INDEXES = ProviderIndexes(location_index=0, address_index=0, rooms_index=1, size_index=2, floor_index=3, rent_index=4,
     available_until_index=5, number_of_signed_up_index=6, image_index=2)
 FORVALTAREN = Provider("Förvaltaren", FORVALTAREN_URL, 'https://www.forvaltaren.se/ledigt/', provider_indexes=FORVALTAREN_INDEXES, 
-    has_duplicates=False, pathToNextButton=None, move_in_date=None, image_prepend_url='https://forvaltaren.se')
+    has_duplicates=False, pathToNextButton=None, move_in_date=None, 
+    image_prepend_url='https://forvaltaren.se')
 
 
 HASSELBY_HEM_INDEXES = ProviderIndexes(location_index=1, address_index=0, rooms_index=1, size_index=2, floor_index=None, rent_index=3,
     available_until_index=4, number_of_signed_up_index=5, image_index=0)
-HASSELBY_HEM = Provider("Hässelby Hem",HASSELBY_HEM_URL, 'https://bostad.hasselbyhem.se/HSS/Object/', provider_indexes=HASSELBY_HEM_INDEXES, has_duplicates=False)
+HASSELBY_HEM = Provider("Hässelby Hem",HASSELBY_HEM_URL, 'https://bostad.hasselbyhem.se/HSS/Object/', 
+    provider_indexes=HASSELBY_HEM_INDEXES, has_duplicates=False, image_prepend_url="")
 
 SOLLENTUNA_HEM_INDEXES = ProviderIndexes(location_index=0, address_index=1, rooms_index=1, size_index=2, floor_index=3, rent_index=4,
     available_until_index=5, number_of_signed_up_index=6, image_index=0)
@@ -60,9 +65,9 @@ HANINGE_BOSTADER = Provider("Haninge Bostäder",HANINGE_BOSTADER_URL, 'https://m
     ,has_duplicates=False)
 
 IKANO_BOSTAD_INDEXES = ProviderIndexes(location_index=1, address_index=1, rooms_index=2, size_index=3, floor_index=0, rent_index=4,
-    available_until_index=5, number_of_signed_up_index=None, image_index=0)
+    available_until_index=5, number_of_signed_up_index=None, image_index=6)
 IKANO_BOSTAD = Provider("Ikano Bostad",IKANO_BOSTAD_URL, 'https://hyresratt.ikanobostad.se/ledigt/detalj/', provider_indexes=IKANO_BOSTAD_INDEXES,
-    has_duplicates=False)
+    has_duplicates=False, image_prepend_url="https://hyresratt.ikanobostad.se")
 
 SIGTUNA_HEM = Provider("Sigtuna Hem", SIGTUNA_HEM_URL, 'https://sigtunahem.se/sok-ledigt/ledig-lagenhet/', pathToNextButton="//a[@href='https://sigtunahem.se/sok-ledigt/?pagination=3&paginationantal=10']")
 
@@ -132,6 +137,7 @@ def getAppartment(appart_html, provider, index):
 def getAppartmentImage(provider, appartment_url):
     if provider.image_prepend_url != None:
         html = BeautifulSoup(getHTML(appartment_url), "html.parser")
+
         imgs = html.find_all('img')
         if provider.provider_indexes.image_index >= len(imgs):
             return
@@ -142,38 +148,38 @@ def getAppartmentImage(provider, appartment_url):
     
 
 def getLink(aelem, provider):
-    return provider.appartment_url + aelem[provider.provider_indexes.address_index]['href']
+    return provider.appartment_url + aelem[provider.provider_indexes.address_index]['href']  
 
-def dumpToDb(appartments):
-    db = firestore.client()
-    doc_ref = db.collection(u'appartments')
-    for app in appartments:
-        doc_ref.add(app.getJSON())    
-
-def main(provider):
+async def main(provider):
     print('Started to fetch: ' + provider.provider_string)
     appContent = getPageContent(provider)
-    app = list(filter(lambda x: x != None, appContent))
-    dumpToDb(app)
-    for appart in app:
-        print(appart.getJSON())
+    appartments = list(filter(lambda x: x != None, appContent))
+    if len(appartments) > 0:
+        print("\n------- FOUND ---------\n")
+        print(list(map(lambda x: x.getJSON(), appartments)))
+        print("\n-----------------------\n")
+    updateDatabase(appartments)
+
     print('Done fetching: ' + provider.provider_string)
     
 def mainProgram():
     listOfAppProviders = [TELGE,BOTKYRKA_BYGGEN,TYRESO_BOSTADER,SIGTUNA_HEM,IKANO_BOSTAD,HANINGE_BOSTADER,VASBY_HEM,SOLLENTUNA_HEM,HASSELBY_HEM,FORVALTAREN]
-    listOfAppProviders = [TELGE]
-    cred = credentials.Certificate('hyresbevakaren-firebase-adminsdk-59i02-620a8327a5.json')
+    listOfAppProviders = [SIGTUNA_HEM]
+
+    cred = credentials.Certificate('hyresbevakaren-firebase-adminsdk-59i02-4c2efe1452.json')
     firebase_admin.initialize_app(cred)
     
     loop = asyncio.get_event_loop()
     tasks = []
-    main(BOTKYRKA_BYGGEN)
-    # for appProvider in listOfAppProviders:
-    #     tasks.append(asyncio.ensure_future(main(appProvider)))
+    #main(FORVALTAREN)
+    for appProvider in listOfAppProviders:
+        tasks.append(asyncio.ensure_future(main(appProvider)))
     
-    # loop.run_until_complete(asyncio.wait(tasks))
+    loop.run_until_complete(asyncio.wait(tasks))
 
-    #for appProvider in listOfAppProviders:
+    # for appProvider in listOfAppProviders:
     #    task = asyncio.ensure_future(main(appProvider))
     #    #task = loop.create_task(main(appProvider))
     #    loop.run_until_complete(asyncio.gather(task))
+
+mainProgram()
