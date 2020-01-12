@@ -6,12 +6,13 @@ import asyncio
 from bs4 import BeautifulSoup
 from enum import Enum
 from WebScraper import *
-from SollentunaParser import getAvailableAppartmentsFromSollentuna
-from SigtunaHemParser import getAvailableAppartmentsFromSigtunaHem
-from TelgeParser import getAvailableAppartmentsFromTelge
-from Appartment import *
-from Provider import Provider, ProviderIndexes
-from FirebaseCommunicator import * 
+
+from ProviderParser.SollentunaParser import getAvailableAppartmentsFromSollentuna
+from ProviderParser.SigtunaHemParser import getAvailableAppartmentsFromSigtunaHem
+from ProviderParser.TelgeParser import getAvailableAppartmentsFromTelge
+from Model.Appartment import *
+from Model.Provider import Provider, ProviderIndexes
+from Network.FirebaseCommunicator import * 
 
 import firebase_admin
 from firebase_admin import credentials
@@ -158,7 +159,7 @@ async def main(provider):
         print("\n------- FOUND ---------\n")
         print(list(map(lambda x: x.getJSON(), appartments)))
         print("\n-----------------------\n")
-    updateDatabase(appartments)
+    updateDatabase(appartments, provider)
 
     print('Done fetching: ' + provider.provider_string)
     
@@ -166,7 +167,7 @@ def mainProgram():
     listOfAppProviders = [TELGE,BOTKYRKA_BYGGEN,TYRESO_BOSTADER,SIGTUNA_HEM,IKANO_BOSTAD,HANINGE_BOSTADER,VASBY_HEM,SOLLENTUNA_HEM,HASSELBY_HEM,FORVALTAREN]
     listOfAppProviders = [SIGTUNA_HEM]
 
-    cred = credentials.Certificate('hyresbevakaren-firebase-adminsdk-59i02-4c2efe1452.json')
+    cred = credentials.Certificate('hyresbevakaren-firebase-adminsdk-59i02-bdb692f7c5.json')
     firebase_admin.initialize_app(cred)
     
     loop = asyncio.get_event_loop()

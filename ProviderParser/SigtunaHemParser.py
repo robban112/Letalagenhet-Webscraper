@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from Appartment import Appartment
+from Model.Appartment import Appartment
 
 def getAvailableAppartmentsFromSigtunaHem(page_content, provider):
     app_list = []
@@ -18,6 +18,8 @@ def getAvailableAppartmentsFromSigtunaHem(page_content, provider):
             if len(rooms_list) > 0:
                 rooms = [int(s) for s in room_string.split() if s.isdigit()][0]
             appartment_url = aelems[1]['href']
+            if not appartment_url[:4] == 'http':
+                continue
         floor = getFloor(appart.find("li", {"class": "floor"}).text)
         rent = getNumberFromString(appart.find("li", {"class": "rent"}).text)
         size = getNumberFromString(appart.find("li", {"class": "size"}).text)

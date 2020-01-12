@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from Appartment import Appartment
+from Model.Appartment import Appartment
 
 def getAvailableAppartmentsFromSollentuna(page_content, provider):
     appartments = []
